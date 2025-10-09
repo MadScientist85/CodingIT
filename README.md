@@ -374,6 +374,8 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 - **[Complete Documentation](https://docs.codinit.dev)** - Full platform guide
 - **[Workspace Guide](./WORKSPACE.md)** - Monorepo architecture & commands
 - **[Desktop App Docs](https://gerome-elassaad.github.io/codinit-app)** - Native app features
+- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md)** - Complete deployment guide
+- **[Vercel Quick Reference](./VERCEL_QUICK_REFERENCE.md)** - Quick setup checklist
 - **[Changelog](./CHANGELOG.md)** - Version history & updates
 - **[Contributing Guide](.github/CONTRIBUTING.md)** - Contribution guidelines
 
