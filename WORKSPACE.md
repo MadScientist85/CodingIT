@@ -358,12 +358,45 @@ Web and desktop apps use different ports (3000 vs 5173), so no conflicts should 
 - Web: Edit `package.json` dev script
 - Desktop: Edit `desktop/package.json` dev script
 
-### Vercel Deploys Desktop App
+### Vercel Deployment Issues
 
-**Check:**
-1. `.vercelignore` exists and contains `apps/`
-2. `vercel.json` uses `pnpm install --filter @codinit/web`
-3. Clear Vercel cache and redeploy
+#### Can't Deploy to Vercel
+
+**Common Causes & Solutions:**
+
+1. **Build Configuration**
+   - Verify Vercel project settings:
+     - Install Command: `pnpm install --filter @codinit/web`
+     - Build Command: `pnpm build`
+     - Output Directory: `.next`
+     - Root Directory: `./` (or leave empty)
+     - Node.js Version: 18.x or 20.x
+
+2. **Missing Environment Variables**
+   - Required in Vercel Dashboard:
+     - `E2B_API_KEY`
+     - `NEXT_PUBLIC_SUPABASE_URL`
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+     - `SUPABASE_SERVICE_ROLE_KEY`
+     - At least one LLM provider key (OpenAI, Anthropic, etc.)
+
+3. **Desktop App Included in Build**
+   - Check `.vercelignore` exists and contains `apps/`
+   - Verify `vercel.json` uses `pnpm install --filter @codinit/web`
+   - Ensure `tsconfig.json` excludes `apps` directory
+   - Clear Vercel cache and redeploy
+
+4. **Test Locally (Simulate Vercel)**
+   ```bash
+   rm -rf node_modules .next
+   pnpm install --filter @codinit/web
+   pnpm build
+   ```
+   If this succeeds, your Vercel settings likely need adjustment.
+
+5. **Cache Issues**
+   - Go to Vercel project Settings → General → Clear Cache
+   - Or use CLI: `vercel --force`
 
 ### Desktop Build Fails
 
