@@ -27,7 +27,9 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
 
     if (filteredFiles.length === 0) {
       const error = new Error('No valid files found');
-      logStore.logError('File import failed - no valid files', error, { folderName: 'Unknown Folder' });
+      logStore.logError('File import failed - no valid files', error, {
+        folderName: 'Unknown Folder',
+      });
       toast.error('No files found in the selected folder');
 
       return;
@@ -66,7 +68,9 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
 
       if (textFiles.length === 0) {
         const error = new Error('No text files found');
-        logStore.logError('File import failed - no text files', error, { folderName });
+        logStore.logError('File import failed - no text files', error, {
+          folderName,
+        });
         toast.error('No text files found in the selected folder');
 
         return;
@@ -122,14 +126,18 @@ export const ImportFolderButton: React.FC<ImportFolderButtonProps> = ({ classNam
         title="Import Folder"
         variant="default"
         size="lg"
-        className={classNames(className)}
+        className={classNames(
+          'gap-2 bg-codinit-elements-background-depth-1',
+          'text-codinit-elements-textPrimary',
+          'hover:bg-codinit-elements-background-depth-2',
+          'border border-codinit-elements-borderColor',
+          'h-10 px-4 py-2 min-w-[120px] justify-center',
+          'transition-all duration-200 ease-in-out',
+          className,
+        )}
         disabled={isLoading}
       >
-        {isLoading ? (
-          <span className="i-svg-spinners:90-ring-with-bg w-5 h-5 text-green-500" />
-        ) : (
-          <span className="i-ph:folder-open-duotone w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
-        )}
+        <span className="i-ph:upload-simple w-4 h-4" />
         {isLoading ? 'Importing...' : 'Import Folder'}
       </Button>
     </>

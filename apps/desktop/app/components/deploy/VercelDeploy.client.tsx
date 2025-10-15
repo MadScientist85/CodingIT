@@ -45,7 +45,9 @@ export function useVercelDeploy() {
       const deployArtifact = workbenchStore.artifacts.get()[deploymentId];
 
       // Notify that build is starting
-      deployArtifact.runner.handleDeployAction('building', 'running', { source: 'vercel' });
+      deployArtifact.runner.handleDeployAction('building', 'running', {
+        source: 'vercel',
+      });
 
       const actionId = 'build-' + Date.now();
       const actionData: ActionCallbackData = {
@@ -74,7 +76,9 @@ export function useVercelDeploy() {
       }
 
       // Notify that build succeeded and deployment is starting
-      deployArtifact.runner.handleDeployAction('deploying', 'running', { source: 'vercel' });
+      deployArtifact.runner.handleDeployAction('deploying', 'running', {
+        source: 'vercel',
+      });
 
       // Get the build files
       const container = await webcontainer;
@@ -96,9 +100,12 @@ export function useVercelDeploy() {
           await container.fs.readdir(dir);
           finalBuildPath = dir;
           buildPathExists = true;
+          console.log(`Using build directory: ${finalBuildPath}`);
           break;
-        } catch {
-          // Directory doesn't exist, expected — just skip it
+        } catch (error) {
+          console.log(`Directory ${dir} doesn't exist, trying next option. ${error}`);
+
+          // Directory doesn't exist, try the next one
           continue;
         }
       }
@@ -110,7 +117,9 @@ export function useVercelDeploy() {
       // Get all files recursively
       async function getAllFiles(dirPath: string): Promise<Record<string, string>> {
         const files: Record<string, string> = {};
-        const entries = await container.fs.readdir(dirPath, { withFileTypes: true });
+        const entries = await container.fs.readdir(dirPath, {
+          withFileTypes: true,
+        });
 
         for (const entry of entries) {
           const fullPath = path.join(dirPath, entry.name);
@@ -132,47 +141,6 @@ export function useVercelDeploy() {
 
       const fileContents = await getAllFiles(finalBuildPath);
 
-      // Get all source project files for framework detection
-      const allProjectFiles: Record<string, string> = {};
-
-      async function getAllProjectFiles(dirPath: string): Promise<void> {
-        const entries = await container.fs.readdir(dirPath, { withFileTypes: true });
-
-        for (const entry of entries) {
-          const fullPath = path.join(dirPath, entry.name);
-
-          if (entry.isFile()) {
-            try {
-              const content = await container.fs.readFile(fullPath, 'utf-8');
-
-              // Store with relative path from project root
-              let relativePath = fullPath;
-
-              if (fullPath.startsWith('/home/project/')) {
-                relativePath = fullPath.replace('/home/project/', '');
-              } else if (fullPath.startsWith('./')) {
-                relativePath = fullPath.replace('./', '');
-              }
-
-              allProjectFiles[relativePath] = content;
-            } catch (error) {
-              // Skip binary files or files that can't be read as text
-              console.log(`Skipping file ${entry.name}: ${error}`);
-            }
-          } else if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-            await getAllProjectFiles(fullPath);
-          }
-        }
-      }
-
-      // Try to read from the current directory first
-      try {
-        await getAllProjectFiles('.');
-      } catch {
-        // Fallback to /home/project if current directory doesn't work
-        await getAllProjectFiles('/home/project');
-      }
-
       // Use chatId instead of artifact.id
       const existingProjectId = localStorage.getItem(`vercel-project-${currentChatId}`);
 
@@ -184,7 +152,6 @@ export function useVercelDeploy() {
         body: JSON.stringify({
           projectId: existingProjectId || undefined,
           files: fileContents,
-          sourceFiles: allProjectFiles,
           token: vercelConn.token,
           chatId: currentChatId,
         }),
