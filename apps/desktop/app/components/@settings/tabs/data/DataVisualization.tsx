@@ -81,7 +81,12 @@ export function DataVisualization({ chats }: DataVisualizationProps) {
 
     setChatsByDate(sortedChatsByDate);
     setMessagesByRole(roleCounts);
-    setApiKeyUsage(Object.entries(apiUsage).map(([provider, count]) => ({ provider, count })));
+    setApiKeyUsage(
+      Object.entries(apiUsage).map(([provider, count]) => ({
+        provider,
+        count,
+      })),
+    );
     setAverageMessagesPerChat(totalMessages / chats.length);
   }, [chats]);
 

@@ -10,8 +10,8 @@ import { DataVisualization } from './DataVisualization';
 import { classNames } from '~/utils/classNames';
 import { toast } from 'react-toastify';
 
-// Create a custom hook to connect to the boltHistory database
-function useBoltHistoryDB() {
+// Create a custom hook to connect to the codinitHistory database
+function usecodinitHistoryDB() {
   const [db, setDb] = useState<IDBDatabase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -74,8 +74,8 @@ interface ChatItem {
 }
 
 export function DataTab() {
-  // Use our custom hook for the boltHistory database
-  const { db, isLoading: dbLoading } = useBoltHistoryDB();
+  // Use our custom hook for the codinitHistory database
+  const { db, isLoading: dbLoading } = usecodinitHistoryDB();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const apiKeyFileInputRef = useRef<HTMLInputElement>(null);
   const chatFileInputRef = useRef<HTMLInputElement>(null);
@@ -88,19 +88,39 @@ export function DataTab() {
 
   // State for settings categories and available chats
   const [settingsCategories] = useState<SettingsCategory[]>([
-    { id: 'core', label: 'Core Settings', description: 'User profile and main settings' },
-    { id: 'providers', label: 'Providers', description: 'API keys and provider configurations' },
-    { id: 'features', label: 'Features', description: 'Feature flags and settings' },
+    {
+      id: 'core',
+      label: 'Core Settings',
+      description: 'User profile and main settings',
+    },
+    {
+      id: 'providers',
+      label: 'Providers',
+      description: 'API keys and provider configurations',
+    },
+    {
+      id: 'features',
+      label: 'Features',
+      description: 'Feature flags and settings',
+    },
     { id: 'ui', label: 'UI', description: 'UI configuration and preferences' },
-    { id: 'connections', label: 'Connections', description: 'External service connections' },
+    {
+      id: 'connections',
+      label: 'Connections',
+      description: 'External service connections',
+    },
     { id: 'debug', label: 'Debug', description: 'Debug settings and logs' },
-    { id: 'updates', label: 'Updates', description: 'Update settings and notifications' },
+    {
+      id: 'updates',
+      label: 'Updates',
+      description: 'Update settings and notifications',
+    },
   ]);
 
   const [availableChats, setAvailableChats] = useState<ExtendedChat[]>([]);
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
 
-  // Data operations hook with boltHistory database
+  // Data operations hook with codinitHistory database
   const {
     isExporting,
     isImporting,
@@ -117,7 +137,7 @@ export function DataTab() {
     handleDownloadTemplate,
     handleImportAPIKeys,
   } = useDataOperations({
-    customDb: db || undefined, // Pass the boltHistory database, converting null to undefined
+    customDb: db || undefined, // Pass the codinitHistory database, converting null to undefined
     onReloadSettings: () => window.location.reload(),
     onReloadChats: () => {
       // Reload chats after reset
@@ -141,7 +161,7 @@ export function DataTab() {
   // Load available chats
   useEffect(() => {
     if (db) {
-      console.log('Loading chats from boltHistory database', {
+      console.log('Loading chats from codinitHistory database', {
         name: db.name,
         version: db.version,
         objectStoreNames: Array.from(db.objectStoreNames),
@@ -514,7 +534,7 @@ export function DataTab() {
             <CardHeader>
               <div className="flex items-center mb-2">
                 <motion.div className="text-accent-500 mr-2" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <div className="i-ph-filter-duotone w-5 h-5" />
+                  <div className="i-ph:funnel-duotone w-5 h-5" />
                 </motion.div>
                 <CardTitle className="text-lg group-hover:text-codinit-elements-item-contentAccent transition-colors">
                   Export Selected Settings

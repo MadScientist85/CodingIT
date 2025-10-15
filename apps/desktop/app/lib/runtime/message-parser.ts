@@ -1,27 +1,31 @@
-import type { ActionType, BoltAction, BoltActionData, FileAction, ShellAction, SupabaseAction } from '~/types/actions';
-import type { BoltArtifactData } from '~/types/artifact';
+import type {
+  ActionType,
+  CodinitAction,
+  CodinitActionData,
+  FileAction,
+  ShellAction,
+  SupabaseAction,
+} from '~/types/actions';
+import type { codinitArtifactData } from '~/types/artifact';
 import { createScopedLogger } from '~/utils/logger';
 import { unreachable } from '~/utils/unreachable';
 
 const ARTIFACT_TAG_OPEN = '<codinitArtifact';
 const ARTIFACT_TAG_CLOSE = '</codinitArtifact>';
-const ARTIFACT_ACTION_TAG_OPEN = '<codinitAction';
-const ARTIFACT_ACTION_TAG_CLOSE = '</codinitAction>';
-const BOLT_QUICK_ACTIONS_OPEN = '<codinit-quick-actions>';
-const BOLT_QUICK_ACTIONS_CLOSE = '</codinit-quick-actions>';
+const ARTIFACT_ACTION_TAG_OPEN = '<CodinitAction';
+const ARTIFACT_ACTION_TAG_CLOSE = '</CodinitAction>';
 
 const logger = createScopedLogger('MessageParser');
 
-export interface ArtifactCallbackData extends BoltArtifactData {
+export interface ArtifactCallbackData extends codinitArtifactData {
   messageId: string;
-  artifactId?: string;
 }
 
 export interface ActionCallbackData {
   artifactId: string;
   messageId: string;
   actionId: string;
-  action: BoltAction;
+  action: CodinitAction;
 }
 
 export type ArtifactCallback = (data: ArtifactCallbackData) => void;
@@ -37,7 +41,6 @@ export interface ParserCallbacks {
 
 interface ElementFactoryProps {
   messageId: string;
-  artifactId?: string;
 }
 
 type ElementFactory = (props: ElementFactoryProps) => string;
@@ -51,9 +54,8 @@ interface MessageState {
   position: number;
   insideArtifact: boolean;
   insideAction: boolean;
-  artifactCounter: number;
-  currentArtifact?: BoltArtifactData;
-  currentAction: BoltActionData;
+  currentArtifact?: codinitArtifactData;
+  currentAction: CodinitActionData;
   actionId: number;
 }
 
@@ -75,7 +77,6 @@ function cleanEscapedTags(content: string) {
 }
 export class StreamingMessageParser {
   #messages = new Map<string, MessageState>();
-  #artifactCounter = 0;
 
   constructor(private _options: StreamingMessageParserOptions = {}) {}
 
@@ -87,7 +88,6 @@ export class StreamingMessageParser {
         position: 0,
         insideAction: false,
         insideArtifact: false,
-        artifactCounter: 0,
         currentAction: { content: '' },
         actionId: 0,
       };
@@ -100,37 +100,6 @@ export class StreamingMessageParser {
     let earlyBreak = false;
 
     while (i < input.length) {
-      if (input.startsWith(BOLT_QUICK_ACTIONS_OPEN, i)) {
-        const actionsBlockEnd = input.indexOf(BOLT_QUICK_ACTIONS_CLOSE, i);
-
-        if (actionsBlockEnd !== -1) {
-          const actionsBlockContent = input.slice(i + BOLT_QUICK_ACTIONS_OPEN.length, actionsBlockEnd);
-
-          // Find all <codinit-quick-action ...>label</codinit-quick-action> inside
-          const quickActionRegex = /<codinit-quick-action([^>]*)>([\s\S]*?)<\/codinit-quick-action>/g;
-          let match;
-          const buttons = [];
-
-          while ((match = quickActionRegex.exec(actionsBlockContent)) !== null) {
-            const tagAttrs = match[1];
-            const label = match[2];
-            const type = this.#extractAttribute(tagAttrs, 'type');
-            const message = this.#extractAttribute(tagAttrs, 'message');
-            const path = this.#extractAttribute(tagAttrs, 'path');
-            const href = this.#extractAttribute(tagAttrs, 'href');
-            buttons.push(
-              createQuickActionElement(
-                { type: type || '', message: message || '', path: path || '', href: href || '' },
-                label,
-              ),
-            );
-          }
-          output += createQuickActionGroup(buttons);
-          i = actionsBlockEnd + BOLT_QUICK_ACTIONS_CLOSE.length;
-          continue;
-        }
-      }
-
       if (state.insideArtifact) {
         const currentArtifact = state.currentArtifact;
 
@@ -171,7 +140,7 @@ export class StreamingMessageParser {
                */
               actionId: String(state.actionId - 1),
 
-              action: currentAction as BoltAction,
+              action: currentAction as CodinitAction,
             });
 
             state.insideAction = false;
@@ -217,7 +186,7 @@ export class StreamingMessageParser {
                 artifactId: currentArtifact.id,
                 messageId,
                 actionId: String(state.actionId++),
-                action: state.currentAction as BoltAction,
+                action: state.currentAction as CodinitAction,
               });
 
               i = actionEndIndex + 1;
@@ -227,7 +196,6 @@ export class StreamingMessageParser {
           } else if (artifactCloseIndex !== -1) {
             this._options.callbacks?.onArtifactClose?.({
               messageId,
-              artifactId: currentArtifact.id,
               ...currentArtifact,
             });
 
@@ -262,9 +230,7 @@ export class StreamingMessageParser {
 
               const artifactTitle = this.#extractAttribute(artifactTag, 'title') as string;
               const type = this.#extractAttribute(artifactTag, 'type') as string;
-
-              // const artifactId = this.#extractAttribute(artifactTag, 'id') as string;
-              const artifactId = `${messageId}-${state.artifactCounter++}`;
+              const artifactId = this.#extractAttribute(artifactTag, 'id') as string;
 
               if (!artifactTitle) {
                 logger.warn('Artifact title missing');
@@ -280,19 +246,18 @@ export class StreamingMessageParser {
                 id: artifactId,
                 title: artifactTitle,
                 type,
-              } satisfies BoltArtifactData;
+              } satisfies codinitArtifactData;
 
               state.currentArtifact = currentArtifact;
 
               this._options.callbacks?.onArtifactOpen?.({
                 messageId,
-                artifactId: currentArtifact.id,
                 ...currentArtifact,
               });
 
               const artifactFactory = this._options.artifactElement ?? createArtifactElement;
 
-              output += artifactFactory({ messageId, artifactId });
+              output += artifactFactory({ messageId });
 
               i = openTagEnd + 1;
             } else {
@@ -313,10 +278,6 @@ export class StreamingMessageParser {
           break;
         }
       } else {
-        /*
-         * Note: Auto-file-creation from code blocks is now handled by EnhancedMessageParser
-         * to avoid duplicate processing and provide better shell command detection
-         */
         output += input[i];
         i++;
       }
@@ -399,18 +360,4 @@ const createArtifactElement: ElementFactory = (props) => {
 
 function camelToDashCase(input: string) {
   return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-}
-
-function createQuickActionElement(props: Record<string, string>, label: string) {
-  const elementProps = [
-    'class="__codinitQuickAction__"',
-    'data-codinit-quick-action="true"',
-    ...Object.entries(props).map(([key, value]) => `data-${camelToDashCase(key)}=${JSON.stringify(value)}`),
-  ];
-
-  return `<button ${elementProps.join(' ')}>${label}</button>`;
-}
-
-function createQuickActionGroup(buttons: string[]) {
-  return `<div class=\"__codinitQuickAction__\" data-codinit-quick-action=\"true\">${buttons.join('')}</div>`;
 }

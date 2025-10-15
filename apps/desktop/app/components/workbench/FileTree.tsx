@@ -778,7 +778,13 @@ function buildFileList(
 
   if (rootFolder === '/' && !hideRoot) {
     defaultDepth = 1;
-    fileList.push({ kind: 'folder', name: '/', depth: 0, id: 0, fullPath: '/' });
+    fileList.push({
+      kind: 'folder',
+      name: '/',
+      depth: 0,
+      id: 0,
+      fullPath: '/',
+    });
   }
 
   for (const [filePath, dirent] of Object.entries(files)) {
@@ -918,5 +924,8 @@ function compareNodes(a: Node, b: Node): number {
     return a.kind === 'folder' ? -1 : 1;
   }
 
-  return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+  return a.name.localeCompare(b.name, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
 }

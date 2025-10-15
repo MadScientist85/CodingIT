@@ -1,6 +1,6 @@
 import type { Message } from 'ai';
 import { generateId } from './fileUtils';
-import { detectProjectCommands, createCommandsMessage, escapeBoltTags } from './projectCommands';
+import { detectProjectCommands, createCommandsMessage, escapecodinitTags } from './projectCommands';
 
 export const createChatFromFolder = async (
   files: File[],
@@ -41,9 +41,9 @@ export const createChatFromFolder = async (
 <codinitArtifact id="imported-files" title="Imported Files" type="bundled" >
 ${fileArtifacts
   .map(
-    (file) => `<codinitAction type="file" filePath="${file.path}">
-${escapeBoltTags(file.content)}
-</codinitAction>`,
+    (file) => `<CodinitAction type="file" filePath="${file.path}">
+${escapecodinitTags(file.content)}
+</CodinitAction>`,
   )
   .join('\n\n')}
 </codinitArtifact>`,

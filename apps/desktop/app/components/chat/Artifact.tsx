@@ -23,16 +23,15 @@ if (import.meta.hot) {
 
 interface ArtifactProps {
   messageId: string;
-  artifactId: string;
 }
 
-export const Artifact = memo(({ artifactId }: ArtifactProps) => {
+export const Artifact = memo(({ messageId }: ArtifactProps) => {
   const userToggledActions = useRef(false);
   const [showActions, setShowActions] = useState(false);
   const [allActionFinished, setAllActionFinished] = useState(false);
 
   const artifacts = useStore(workbenchStore.artifacts);
-  const artifact = artifacts[artifactId];
+  const artifact = artifacts[messageId];
 
   const actions = useStore(
     computed(artifact.runner.actions, (actions) => {
@@ -185,7 +184,7 @@ const actionVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export function openArtifactInWorkbench(filePath: any) {
+function openArtifactInWorkbench(filePath: any) {
   if (workbenchStore.currentView.get() !== 'code') {
     workbenchStore.currentView.set('code');
   }

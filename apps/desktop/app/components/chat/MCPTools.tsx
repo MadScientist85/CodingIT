@@ -3,7 +3,7 @@ import { classNames } from '~/utils/classNames';
 import { Dialog, DialogRoot, DialogClose, DialogTitle, DialogButton } from '~/components/ui/Dialog';
 import { IconButton } from '~/components/ui/IconButton';
 import { useMCPStore } from '~/lib/stores/mcp';
-import McpServerList from '~/components/@settings/tabs/mcp/McpServerList';
+import McpServerList from '~/components/@settings/mcp/McpServerList';
 
 export function McpTools() {
   const isInitialized = useMCPStore((state) => state.isInitialized);

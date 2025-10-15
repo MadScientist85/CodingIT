@@ -8,7 +8,6 @@ import type { Node as UnistNode, Parent as UnistParent } from 'unist';
 export const allowedHTMLElements = [
   'a',
   'b',
-  'button',
   'blockquote',
   'br',
   'code',
@@ -56,7 +55,6 @@ export const allowedHTMLElements = [
   'ul',
   'var',
   'think',
-  'header',
 ];
 
 // Add custom rehype plugin
@@ -65,7 +63,7 @@ function remarkThinkRawContent() {
     visit(tree, (node: any) => {
       if (node.type === 'html' && node.value && node.value.startsWith('<think>')) {
         const cleanedContent = node.value.slice(7);
-        node.value = `<div class="__boltThought__">${cleanedContent}`;
+        node.value = `<div class="__codinitThought__">${cleanedContent}`;
 
         return;
       }
@@ -86,18 +84,9 @@ const rehypeSanitizeOptions: RehypeSanitizeOptions = {
     div: [
       ...(defaultSchema.attributes?.div ?? []),
       'data*',
-      ['className', '__codinitArtifact__', '__boltThought__', '__boltQuickAction', '__boltSelectedElement__'],
+      ['className', '__codinitArtifact__', '__codinitThought__'],
 
-      // ['className', '__boltThought__']
-    ],
-    button: [
-      ...(defaultSchema.attributes?.button ?? []),
-      'data*',
-      'type',
-      'disabled',
-      'name',
-      'value',
-      ['className', '__codinitArtifact__', '__boltThought__', '__boltQuickAction'],
+      // ['className', '__codinitThought__']
     ],
   },
   strip: [],

@@ -111,21 +111,7 @@ export class LLMManager {
               return models;
             })
             .catch((err) => {
-              // Only log as error if it's not a common expected failure
-              const errorMessage = err?.message || String(err);
-              const isExpectedFailure =
-                errorMessage.includes('Missing Api Key') ||
-                errorMessage.includes('fetch failed') ||
-                errorMessage.includes('ECONNREFUSED') ||
-                errorMessage.includes('ENOTFOUND');
-
-              if (isExpectedFailure) {
-                // Silently skip expected failures (missing API keys, local providers not running)
-                return [];
-              }
-
               logger.error(`Error getting dynamic models ${provider.name} :`, err);
-
               return [];
             });
 
@@ -191,21 +177,7 @@ export class LLMManager {
         return models;
       })
       .catch((err) => {
-        // Only log as error if it's not a common expected failure
-        const errorMessage = err?.message || String(err);
-        const isExpectedFailure =
-          errorMessage.includes('Missing Api Key') ||
-          errorMessage.includes('fetch failed') ||
-          errorMessage.includes('ECONNREFUSED') ||
-          errorMessage.includes('ENOTFOUND');
-
-        if (isExpectedFailure) {
-          // Silently skip expected failures (missing API keys, local providers not running)
-          return [];
-        }
-
         logger.error(`Error getting dynamic models ${provider.name} :`, err);
-
         return [];
       });
     const dynamicModelsName = dynamicModels.map((d) => d.name);

@@ -60,4 +60,3 @@ apps/*/.next/
 apps/*/out/
 apps/*/.env
 apps/*/.env.local
-apps/*/pnpm-lock.yaml

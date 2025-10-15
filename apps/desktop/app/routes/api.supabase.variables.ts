@@ -3,7 +3,10 @@ import { json, type ActionFunctionArgs } from '@remix-run/cloudflare';
 export async function action({ request }: ActionFunctionArgs) {
   try {
     // Add proper type assertion for the request body
-    const body = (await request.json()) as { projectId?: string; token?: string };
+    const body = (await request.json()) as {
+      projectId?: string;
+      token?: string;
+    };
     const { projectId, token } = body;
 
     if (!projectId || !token) {
@@ -27,6 +30,11 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ apiKeys });
   } catch (error) {
     console.error('Error fetching project API keys:', error);
-    return json({ error: error instanceof Error ? error.message : 'Unknown error occurred' }, { status: 500 });
+    return json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    );
   }
 }

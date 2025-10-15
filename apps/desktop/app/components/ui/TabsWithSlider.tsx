@@ -51,7 +51,10 @@ export function TabsWithSlider({
   sliderClassName,
 }: TabsWithSliderProps) {
   // State for slider dimensions
-  const [sliderDimensions, setSliderDimensions] = useState({ width: 0, left: 0 });
+  const [sliderDimensions, setSliderDimensions] = useState({
+    width: 0,
+    left: 0,
+  });
 
   // Refs for tab elements
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
