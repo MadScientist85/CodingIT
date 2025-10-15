@@ -379,6 +379,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 </ClientOnly>
                 <ScrollToBottom />
               </StickToBottom.Content>
+              {!chatStarted && (
+                <div className="flex flex-col items-center gap-4 mb-6 w-full max-w-chat mx-auto">
+                  <h3 className="text-codinit-elements-textSecondary text-sm font-medium">
+                    Start by importing existing work
+                  </h3>
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {ImportButtons(importChat)}
+                    <GitCloneButton importChat={importChat} />
+                  </div>
+                </div>
+              )}
               <div
                 className={classNames('my-auto flex flex-col gap-2 w-full max-w-chat mx-auto z-prompt mb-6', {
                   'sticky bottom-2': chatStarted,
