@@ -11,7 +11,6 @@ import type { ContextAnnotation, ProgressAnnotation } from '~/types/context';
 import { WORK_DIR } from '~/utils/constants';
 import { createSummary } from '~/lib/.server/llm/create-summary';
 import { extractPropertiesFromMessage } from '~/lib/.server/llm/utils';
-import type { DesignScheme } from '~/types/design-scheme';
 import { MCPService } from '~/lib/services/mcpService';
 import { StreamRecoveryManager } from '~/lib/.server/llm/stream-recovery';
 
@@ -48,24 +47,21 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     },
   });
 
-  const { messages, files, promptId, contextOptimization, supabase, chatMode, designScheme, maxLLMSteps } =
-    await request.json<{
-      messages: Messages;
-      files: any;
-      promptId?: string;
-      contextOptimization: boolean;
-      chatMode: 'discuss' | 'build';
-      designScheme?: DesignScheme;
-      supabase?: {
-        isConnected: boolean;
-        hasSelectedProject: boolean;
-        credentials?: {
-          anonKey?: string;
-          supabaseUrl?: string;
-        };
+  const { messages, files, promptId, contextOptimization, supabase, maxLLMSteps } = await request.json<{
+    messages: Messages;
+    files: any;
+    promptId?: string;
+    contextOptimization: boolean;
+    supabase?: {
+      isConnected: boolean;
+      hasSelectedProject: boolean;
+      credentials?: {
+        anonKey?: string;
+        supabaseUrl?: string;
       };
-      maxLLMSteps: number;
-    }>();
+    };
+    maxLLMSteps: number;
+  }>();
 
   const cookieHeader = request.headers.get('Cookie');
   const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
@@ -276,8 +272,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
               promptId,
               contextOptimization,
               contextFiles: filteredFiles,
-              chatMode,
-              designScheme,
               summary,
               messageSliceId,
             });
@@ -317,8 +311,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
           promptId,
           contextOptimization,
           contextFiles: filteredFiles,
-          chatMode,
-          designScheme,
           summary,
           messageSliceId,
         });
@@ -389,7 +381,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
           if (typeof chunk === 'string') {
             if (chunk.startsWith('g') && !lastChunk.startsWith('g')) {
-              controller.enqueue(encoder.encode(`0: "<div class=\\"__boltThought__\\">"\n`));
+              controller.enqueue(encoder.encode(`0: "<div class=\\"__codinitThought__\\">"\n`));
             }
 
             if (lastChunk.startsWith('g') && !chunk.startsWith('g')) {

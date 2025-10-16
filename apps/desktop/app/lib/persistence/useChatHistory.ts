@@ -136,9 +136,9 @@ export function useChatHistory() {
                     .map(([key, value]) => {
                       if (value?.type === 'file') {
                         return `
-                      <codinitAction type="file" filePath="${key}">
+                      <CodinitAction type="file" filePath="${key}">
 ${value.content}
-                      </codinitAction>
+                      </CodinitAction>
                       `;
                       } else {
                         return ``;
@@ -146,7 +146,7 @@ ${value.content}
                     })
                     .join('\n')}
                   ${commandActionsString} 
-                  </boltArtifact>
+                  </codinitArtifact>
                   `, // Added commandActionsString, followupMessage, updated id and title
                   annotations: [
                     'no-store',
@@ -199,7 +199,7 @@ ${value.content}
 
   const takeSnapshot = useCallback(
     async (chatIdx: string, files: FileMap, _chatId?: string | undefined, chatSummary?: string) => {
-      const id = chatId.get();
+      const id = _chatId || chatId.get();
 
       if (!id || !db) {
         return;
@@ -247,7 +247,9 @@ ${value.content}
           key = key.replace(container.workdir, '');
         }
 
-        await container.fs.writeFile(key, value.content, { encoding: value.isBinary ? undefined : 'utf8' });
+        await container.fs.writeFile(key, value.content, {
+          encoding: value.isBinary ? undefined : 'utf8',
+        });
       } else {
       }
     });
@@ -385,7 +387,9 @@ ${value.content}
         exportDate: new Date().toISOString(),
       };
 
-      const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(chatData, null, 2)], {
+        type: 'application/json',
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

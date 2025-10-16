@@ -1,19 +1,19 @@
 {
-  "name": "@codinit/desktop",
-  "description": "An AI-Powered Development Platform - Desktop App",
+  "name": "codinit",
+  "description": "An AI-Powered Development Platform",
   "private": true,
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "author": {
     "name": "Gerome-Elassaad",
     "email": "gerome.e24@gmail.com"
   },
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' remix vite:build",
-    "dev": "node pre-start.mjs && remix vite:dev",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 remix vite:build",
+    "dev": "node pre-start.cjs && remix vite:dev",
     "test": "vitest --run",
     "test:watch": "vitest",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint app",
@@ -28,24 +28,22 @@
     "typecheck": "tsc",
     "typegen": "wrangler types",
     "preview": "pnpm run build && pnpm run start",
+    "prepare": "husky",
     "clean": "node scripts/clean.js",
     "electron:dev": "node scripts/electron-dev.mjs",
-    "electron:dev:inspect": "NODE_ENV=development electron --inspect=9229 build/electron/main/index.mjs",
-    "electron:build:deps": "pnpm electron:build:main && pnpm electron:build:preload",
+    "electron:dev:inspect": "cross-env NODE_ENV=development electron --inspect=9229 build/electron/main/index.mjs",
+    "electron:build:deps": "concurrently \"pnpm electron:build:main\" \"pnpm electron:build:preload\" --kill-others-on-fail",
     "electron:build:main": "vite build --config ./electron/main/vite.config.ts",
     "electron:build:preload": "vite build --config ./electron/preload/vite.config.ts",
-    "electron:build:renderer": "NODE_OPTIONS='--max-old-space-size=8192' pnpm exec remix vite:build --config vite-electron.config.js",
-    "electron:build:unpack": "rm -rf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --dir",
-    "electron:build:mac": "rm -rf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --mac",
-    "electron:build:win": "rm -rf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --win",
-    "electron:build:linux": "rm -rf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --linux",
-    "electron:build:dist": "rm -rf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --mwl",
-    "electron:build:simple": "pnpm electron:build:renderer && pnpm electron:build:deps && echo Build complete - run electron . to test",
-    "convert:icon": "node scripts/convert-icon.mjs",
-    "build:dmg": "pnpm convert:icon && pnpm electron:build:mac"
+    "electron:build:renderer": "cross-env NODE_OPTIONS=--max-old-space-size=8192 remix vite:build --config vite-electron.config.js",
+    "electron:build:unpack": "rimraf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --dir",
+    "electron:build:mac": "rimraf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --mac",
+    "electron:build:win": "rimraf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --win",
+    "electron:build:linux": "rimraf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder --linux",
+    "electron:build:dist": "rimraf dist && pnpm electron:build:renderer && pnpm electron:build:deps && electron-builder -m -w -l"
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20.15.1"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "1.0.6",
@@ -73,7 +71,6 @@
     "@codemirror/search": "^6.5.11",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.4",
-    "@electron/packager": "^18.4.4",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@iconify-json/svg-spinners": "^1.2.4",
@@ -101,9 +98,7 @@
     "@remix-run/cloudflare-pages": "^2.17.1",
     "@remix-run/node": "^2.17.1",
     "@remix-run/react": "^2.17.1",
-    "@supabase/supabase-js": "^2.58.0",
     "@tanstack/react-virtual": "^3.13.12",
-    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/unist": "^3.0.3",
     "@uiw/codemirror-theme-vscode": "^4.25.2",
     "@unocss/reset": "^0.61.9",
@@ -130,16 +125,14 @@
     "istextorbinary": "^9.5.0",
     "jose": "^5.10.0",
     "js-cookie": "^3.0.5",
-    "jspdf": "^3.0.3",
+    "jspdf": "^3.0.2",
     "jszip": "^3.10.1",
-    "keytar": "^7.9.0",
     "lucide-react": "^0.485.0",
     "mime": "^4.1.0",
     "nanostores": "^0.10.3",
     "ollama-ai-provider": "^0.15.2",
     "path-browserify": "^1.0.1",
     "react": "^18.3.1",
-    "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.3.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -159,7 +152,6 @@
     "rollup-plugin-node-polyfills": "^0.2.1",
     "shiki": "^1.29.2",
     "tailwind-merge": "^2.6.0",
-    "unist": "^0.0.1",
     "unist-util-visit": "^5.0.0",
     "use-debounce": "^10.0.6",
     "vite-plugin-node-polyfills": "^0.22.0",
@@ -171,8 +163,8 @@
     "@cloudflare/workers-types": "^4.20251004.0",
     "@electron/notarize": "^2.5.0",
     "@iconify-json/ph": "^1.2.2",
+    "@iconify-json/simple-icons": "^1.2.54",
     "@iconify/types": "^2.0.0",
-    "@iconify/utils": "^3.0.2",
     "@remix-run/dev": "^2.17.1",
     "@remix-run/serve": "^2.17.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -186,14 +178,11 @@
     "@types/react-dom": "^18.3.7",
     "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^4.7.0",
-    "appdmg": "^0.6.6",
     "concurrently": "^8.2.2",
-    "create-dmg": "^7.1.0",
     "cross-env": "^7.0.3",
     "crypto-browserify": "^3.12.1",
-    "electron": "^38.2.1",
+    "electron": "^35.7.5",
     "electron-builder": "^26.0.12",
-    "electron-packager": "^17.1.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "fast-glob": "^3.3.3",
@@ -201,15 +190,11 @@
     "is-ci": "^3.0.1",
     "jsdom": "^26.1.0",
     "node-fetch": "^3.3.2",
-    "pnpm": "^10.18.0",
+    "pnpm": "^10.0.0",
     "prettier": "^3.6.2",
     "rimraf": "^4.4.1",
     "sass-embedded": "^1.93.2",
     "stream-browserify": "^3.0.0",
-    "@stylistic/eslint-plugin-ts": "^2.0.0",
-    "@typescript-eslint/utils": "^8.0.0-alpha.30",
-    "@eslint-community/eslint-utils": "^4.2.0",
-    "eslint-visitor-keys": "^3.4.0",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "unocss": "^0.61.9",
@@ -221,25 +206,17 @@
     "wrangler": "^4.42.0"
   },
   "resolutions": {
-    "@typescript-eslint/utils": "^8.0.0-alpha.30",
-    "jsondiffpatch": "0.7.3",
-    "estree-util-value-to-estree": "^3.3.3",
-    "nanoid": "^3.3.8",
-    "dompurify": "3.2.7",
-    "esbuild": "0.25.10",
-    "undici-types": "^7.13.0"
+    "@typescript-eslint/utils": "^8.0.0-alpha.30"
   },
   "pnpm": {
     "overrides": {
-      "estree-util-value-to-estree": "^3.3.3",
-      "nanoid": "^3.3.8",
-      "undici-types": "^7.13.0"
+      "wrangler": "^4.42.1"
     },
-    "onlyBuiltDependencies": [
-      "electron",
-      "fs-xattr"
-    ]
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "wrangler": "4"
+      }
+    }
   },
-  "packageManager": "pnpm@10.18.0",
-  "main": "build/electron/main/index.mjs"
+  "packageManager": "pnpm@10.18.2"
 }

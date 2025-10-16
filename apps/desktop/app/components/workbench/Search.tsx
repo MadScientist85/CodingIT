@@ -174,7 +174,10 @@ export function Search() {
      */
     const adjustedLine = typeof line === 'number' ? Math.max(0, line - 1) : undefined;
 
-    workbenchStore.setCurrentDocumentScrollPosition({ line: adjustedLine, column: 0 });
+    workbenchStore.setCurrentDocumentScrollPosition({
+      line: adjustedLine,
+      column: 0,
+    });
   };
 
   return (
@@ -211,7 +214,9 @@ export function Search() {
               >
                 <span
                   className=" i-ph:caret-down-thin w-3 h-3 text-codinit-elements-textSecondary transition-transform"
-                  style={{ transform: expandedFiles[file] ? 'rotate(180deg)' : undefined }}
+                  style={{
+                    transform: expandedFiles[file] ? 'rotate(180deg)' : undefined,
+                  }}
                 />
                 <span className="font-normal text-sm">{file.split('/').pop()}</span>
                 <span className="h-5.5 w-5.5 flex items-center justify-center text-xs ml-auto bg-codinit-elements-item-backgroundAccent text-codinit-elements-item-contentAccent rounded-full">

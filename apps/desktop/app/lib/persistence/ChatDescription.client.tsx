@@ -30,7 +30,9 @@ export function ChatDescription() {
             onChange={handleChange}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            style={{ width: `${Math.max(currentDescription.length * 8, 100)}px` }}
+            style={{
+              width: `${Math.max(currentDescription.length * 8, 100)}px`,
+            }}
           />
           <TooltipProvider>
             <WithTooltip tooltip="Save title">
@@ -49,14 +51,16 @@ export function ChatDescription() {
           {currentDescription}
           <TooltipProvider>
             <WithTooltip tooltip="Rename chat">
-              <button
-                type="button"
-                className="ml-2 i-ph:pencil-fill scale-110 hover:text-codinit-elements-item-contentAccent"
-                onClick={(event) => {
-                  event.preventDefault();
-                  toggleEditMode();
-                }}
-              />
+              <div className="flex justify-between items-center p-2 rounded-md bg-codinit-elements-item-backgroundAccent ml-2">
+                <button
+                  type="button"
+                  className="i-ph:pencil-fill scale-110 hover:text-codinit-elements-item-contentAccent"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    toggleEditMode();
+                  }}
+                />
+              </div>
             </WithTooltip>
           </TooltipProvider>
         </>

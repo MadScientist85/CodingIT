@@ -19,12 +19,8 @@ import 'virtual:uno.css';
 export const links: LinksFunction = () => [
   {
     rel: 'icon',
-    href: '/favicon.ico',
-    type: 'image/x-icon',
-  },
-  {
-    rel: 'apple-touch-icon',
-    href: '/apple-touch-icon.png',
+    href: '/icon.png',
+    type: 'image/png',
   },
   { rel: 'stylesheet', href: reactToastifyStyles },
   { rel: 'stylesheet', href: tailwindReset },
@@ -49,7 +45,7 @@ const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
 
   function setTutorialKitTheme() {
-    let theme = localStorage.getItem('bolt_theme');
+    let theme = localStorage.getItem('codinit_theme');
 
     if (!theme) {
       theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -97,24 +93,6 @@ export default function App() {
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
     });
-
-    // Initialize debug logging with improved error handling
-    import('./utils/debugLogger')
-      .then(({ debugLogger }) => {
-        /*
-         * The debug logger initializes itself and starts disabled by default
-         * It will only start capturing when enableDebugMode() is called
-         */
-        const status = debugLogger.getStatus();
-        logStore.logSystem('Debug logging ready', {
-          initialized: status.initialized,
-          capturing: status.capturing,
-          enabled: status.enabled,
-        });
-      })
-      .catch((error) => {
-        logStore.logError('Failed to initialize debug logging', error);
-      });
   }, []);
 
   return (

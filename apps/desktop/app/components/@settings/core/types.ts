@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { User, Folder, Wifi, Settings, Box, Sliders } from 'lucide-react';
 
 export type SettingCategory = 'profile' | 'file_sharing' | 'connectivity' | 'system' | 'services' | 'preferences';
 
@@ -11,13 +10,13 @@ export type TabType =
   | 'data'
   | 'cloud-providers'
   | 'local-providers'
-  | 'github'
-  | 'gitlab'
-  | 'netlify'
-  | 'vercel'
-  | 'supabase'
+  | 'service-status'
+  | 'connection'
+  | 'debug'
   | 'event-logs'
-  | 'mcp';
+  | 'update'
+  | 'task-manager'
+  | 'tab-management';
 
 export type WindowType = 'user' | 'developer';
 
@@ -64,6 +63,7 @@ export interface UserTabConfig extends TabVisibilityConfig {
 
 export interface TabWindowConfig {
   userTabs: UserTabConfig[];
+  developerTabs: DevTabConfig[];
 }
 
 export const TAB_LABELS: Record<TabType, string> = {
@@ -74,13 +74,13 @@ export const TAB_LABELS: Record<TabType, string> = {
   data: 'Data Management',
   'cloud-providers': 'Cloud Providers',
   'local-providers': 'Local Providers',
-  github: 'GitHub',
-  gitlab: 'GitLab',
-  netlify: 'Netlify',
-  vercel: 'Vercel',
-  supabase: 'Supabase',
+  'service-status': 'Service Status',
+  connection: 'Connections',
+  debug: 'Debug',
   'event-logs': 'Event Logs',
-  mcp: 'MCP Servers',
+  update: 'Updates',
+  'task-manager': 'Task Manager',
+  'tab-management': 'Tab Management',
 };
 
 export const categoryLabels: Record<SettingCategory, string> = {
@@ -92,13 +92,13 @@ export const categoryLabels: Record<SettingCategory, string> = {
   preferences: 'Preferences',
 };
 
-export const categoryIcons: Record<SettingCategory, React.ComponentType<{ className?: string }>> = {
-  profile: User,
-  file_sharing: Folder,
-  connectivity: Wifi,
-  system: Settings,
-  services: Box,
-  preferences: Sliders,
+export const categoryIcons: Record<SettingCategory, string> = {
+  profile: 'i-ph:user-circle',
+  file_sharing: 'i-ph:folder-simple',
+  connectivity: 'i-ph:wifi-high',
+  system: 'i-ph:gear',
+  services: 'i-ph:cube',
+  preferences: 'i-ph:sliders',
 };
 
 export interface Profile {

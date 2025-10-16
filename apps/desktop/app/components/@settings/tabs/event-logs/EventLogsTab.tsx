@@ -424,7 +424,9 @@ export function EventLogsTab() {
         },
       };
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -525,7 +527,10 @@ export function EventLogsTab() {
       const summaryItems = [
         { label: 'Generated', value: new Date().toLocaleString() },
         { label: 'Total Logs', value: filteredLogs.length.toString() },
-        { label: 'Filter Applied', value: selectedLevel === 'all' ? 'All Types' : selectedLevel },
+        {
+          label: 'Filter Applied',
+          value: selectedLevel === 'all' ? 'All Types' : selectedLevel,
+        },
         { label: 'Search Query', value: searchQuery || 'None' },
         { label: 'Time Format', value: use24Hour ? '24-hour' : '12-hour' },
       ];

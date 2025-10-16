@@ -8,6 +8,7 @@ import {
   autoSelectStarterTemplate,
   enableContextOptimizationStore,
   tabConfigurationStore,
+  updateTabConfiguration as updateTabConfig,
   resetTabConfiguration as resetTabConfig,
   updateProviderSettings as updateProviderSettingsStore,
   updateLatestBranch,
@@ -19,7 +20,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import type { IProviderSetting, ProviderInfo, IProviderConfig } from '~/types/model';
-import type { TabWindowConfig } from '~/components/@settings/core/types';
+import type { TabWindowConfig, TabVisibilityConfig } from '~/components/@settings/core/types';
 import { logStore } from '~/lib/stores/logs';
 import { getLocalStorage, setLocalStorage } from '~/lib/persistence';
 
@@ -61,6 +62,7 @@ export interface UseSettingsReturn {
 
   // Tab configuration
   tabConfiguration: TabWindowConfig;
+  updateTabConfiguration: (config: TabVisibilityConfig) => void;
   resetTabConfiguration: () => void;
 }
 
@@ -203,6 +205,7 @@ export function useSettings(): UseSettingsReturn {
     setTimezone,
     settings,
     tabConfiguration,
+    updateTabConfiguration: updateTabConfig,
     resetTabConfiguration: resetTabConfig,
   };
 }

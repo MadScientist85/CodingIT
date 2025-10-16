@@ -36,24 +36,6 @@ export async function newShellProcess(webcontainer: WebContainer, terminal: ITer
         }
 
         terminal.write(data);
-
-        // Capture terminal output for debugging
-        try {
-          import('~/utils/debugLogger')
-            .then(({ captureTerminalLog }) => {
-              // Clean the data by removing ANSI escape sequences for logging
-              const cleanData = data.replace(/\x1b\[[0-9;]*[mG]/g, '').trim();
-
-              if (cleanData) {
-                captureTerminalLog(cleanData, 'output');
-              }
-            })
-            .catch(() => {
-              // Ignore if debug logger is not available
-            });
-        } catch {
-          // Ignore errors in debug logging
-        }
       },
     }),
   );
@@ -63,45 +45,31 @@ export async function newShellProcess(webcontainer: WebContainer, terminal: ITer
 
     if (isInteractive) {
       input.write(data);
-
-      // Capture terminal input for debugging
-      try {
-        import('~/utils/debugLogger')
-          .then(({ captureTerminalLog }) => {
-            // Clean the data and check if it's a command (not just cursor movement)
-            const cleanData = data.replace(/\x1b\[[0-9;]*[A-Z]/g, '').trim();
-
-            if (cleanData && cleanData !== '\r' && cleanData !== '\n') {
-              captureTerminalLog(cleanData, 'input');
-            }
-          })
-          .catch(() => {
-            // Ignore if debug logger is not available
-          });
-      } catch {
-        // Ignore errors in debug logging
-      }
     }
   });
 
   await jshReady.promise;
-
-  // Change to workdir to ensure commands run in correct directory
-  input.write(`cd ${webcontainer.workdir}\n`);
 
   return process;
 }
 
 export type ExecutionResult = { output: string; exitCode: number } | undefined;
 
-export class BoltShell {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export class codinitShell {
   #initialized: (() => void) | undefined;
   #readyPromise: Promise<void>;
   #webcontainer: WebContainer | undefined;
   #terminal: ITerminal | undefined;
   #process: WebContainerProcess | undefined;
   executionState = atom<
-    { sessionId: string; active: boolean; executionPrms?: Promise<any>; abort?: () => void } | undefined
+    | {
+        sessionId: string;
+        active: boolean;
+        executionPrms?: Promise<any>;
+        abort?: () => void;
+      }
+    | undefined
   >();
   #outputStream: ReadableStreamDefaultReader<string> | undefined;
   #shellInputStream: WritableStreamDefaultWriter<string> | undefined;
@@ -121,7 +89,7 @@ export class BoltShell {
     this.#terminal = terminal;
 
     // Use all three streams from tee: one for terminal, one for command execution, one for Expo URL detection
-    const { process, commandStream, expoUrlStream } = await this.newBoltShellProcess(webcontainer, terminal);
+    const { process, commandStream, expoUrlStream } = await this.newcodinitShellProcess(webcontainer, terminal);
     this.#process = process;
     this.#outputStream = commandStream.getReader();
 
@@ -129,20 +97,10 @@ export class BoltShell {
     this._watchExpoUrlInBackground(expoUrlStream);
 
     await this.waitTillOscCode('interactive');
-
-    // Change to workdir after shell is interactive to ensure commands run in correct directory
-    await this.#changeToWorkdir(webcontainer);
-
     this.#initialized?.();
   }
 
-  async #changeToWorkdir(webcontainer: WebContainer) {
-    const workdir = webcontainer.workdir;
-    this.#shellInputStream?.write(`cd ${workdir}\n`);
-    await this.waitTillOscCode('prompt');
-  }
-
-  async newBoltShellProcess(webcontainer: WebContainer, terminal: ITerminal) {
+  async newcodinitShellProcess(webcontainer: WebContainer, terminal: ITerminal) {
     const args: string[] = [];
     const process = await webcontainer.spawn('/bin/jsh', ['--osc', ...args], {
       terminal: {
@@ -186,7 +144,12 @@ export class BoltShell {
     await jshReady.promise;
 
     // Return all streams for use in init
-    return { process, terminalStream: streamA, commandStream: streamC, expoUrlStream: streamD };
+    return {
+      process,
+      terminalStream: streamA,
+      commandStream: streamC,
+      expoUrlStream: streamD,
+    };
   }
 
   // Dedicated background watcher for Expo URL
@@ -255,7 +218,12 @@ export class BoltShell {
 
     //wait for the execution to finish
     const executionPromise = this.getCurrentExecutionResult();
-    this.executionState.set({ sessionId, active: true, executionPrms: executionPromise, abort });
+    this.executionState.set({
+      sessionId,
+      active: true,
+      executionPrms: executionPromise,
+      abort,
+    });
 
     const resp = await executionPromise;
     this.executionState.set({ sessionId, active: false });
@@ -392,6 +360,6 @@ export function cleanTerminalOutput(input: string): string {
     .replace(/\u0000/g, ''); // Remove null characters
 }
 
-export function newBoltShellProcess() {
-  return new BoltShell();
+export function newcodinitShellProcess() {
+  return new codinitShell();
 }

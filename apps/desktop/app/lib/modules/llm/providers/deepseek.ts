@@ -7,6 +7,7 @@ import { createDeepSeek } from '@ai-sdk/deepseek';
 export default class DeepseekProvider extends BaseProvider {
   name = 'Deepseek';
   getApiKeyLink = 'https://platform.deepseek.com/apiKeys';
+  icon = '/thirdparty/logos/deepseek.svg';
 
   config = {
     apiTokenKey: 'DEEPSEEK_API_KEY',
@@ -18,21 +19,18 @@ export default class DeepseekProvider extends BaseProvider {
       label: 'Deepseek-Coder',
       provider: 'Deepseek',
       maxTokenAllowed: 8000,
-      maxCompletionTokens: 8192,
     },
     {
       name: 'deepseek-chat',
       label: 'Deepseek-Chat',
       provider: 'Deepseek',
       maxTokenAllowed: 8000,
-      maxCompletionTokens: 8192,
     },
     {
       name: 'deepseek-reasoner',
       label: 'Deepseek-Reasoner',
       provider: 'Deepseek',
       maxTokenAllowed: 8000,
-      maxCompletionTokens: 8192,
     },
   ];
 

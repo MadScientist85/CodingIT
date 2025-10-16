@@ -3,12 +3,11 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import type { BundledLanguage } from 'shiki';
 import { createScopedLogger } from '~/utils/logger';
 import { rehypePlugins, remarkPlugins, allowedHTMLElements } from '~/utils/markdown';
-import { Artifact, openArtifactInWorkbench } from './Artifact';
+import { Artifact } from './Artifact';
 import { CodeBlock } from './CodeBlock';
-import type { Message } from 'ai';
+
 import styles from './Markdown.module.scss';
 import ThoughtBox from './ThoughtBox';
-import type { ProviderInfo } from '~/types/model';
 
 const logger = createScopedLogger('MarkdownComponent');
 
@@ -16,196 +15,68 @@ interface MarkdownProps {
   children: string;
   html?: boolean;
   limitedMarkdown?: boolean;
-  append?: (message: Message) => void;
-  chatMode?: 'discuss' | 'build';
-  setChatMode?: (mode: 'discuss' | 'build') => void;
-  model?: string;
-  provider?: ProviderInfo;
 }
 
-export const Markdown = memo(
-  ({ children, html = false, limitedMarkdown = false, append, setChatMode, model, provider }: MarkdownProps) => {
-    logger.trace('Render');
+export const Markdown = memo(({ children, html = false, limitedMarkdown = false }: MarkdownProps) => {
+  logger.trace('Render');
 
-    const components = useMemo(() => {
-      return {
-        div: ({ className, children, node, ...props }) => {
-          const dataProps = node?.properties as Record<string, unknown>;
+  const components = useMemo(() => {
+    return {
+      div: ({ className, children, node, ...props }) => {
+        if (className?.includes('__codinitArtifact__')) {
+          const messageId = node?.properties.dataMessageId as string;
 
-          if (className?.includes('__codinitArtifact__')) {
-            const messageId = node?.properties.dataMessageId as string;
-            const artifactId = node?.properties.dataArtifactId as string;
-
-            if (!messageId) {
-              logger.error(`Invalid message id ${messageId}`);
-            }
-
-            if (!artifactId) {
-              logger.error(`Invalid artifact id ${artifactId}`);
-            }
-
-            return <Artifact messageId={messageId} artifactId={artifactId} />;
+          if (!messageId) {
+            logger.error(`Invalid message id ${messageId}`);
           }
 
-          if (className?.includes('__boltSelectedElement__')) {
-            const messageId = node?.properties.dataMessageId as string;
-            const elementDataAttr = node?.properties.dataElement as string;
+          return <Artifact messageId={messageId} />;
+        }
 
-            // Parse the element data if it exists
-            let elementData: any = null;
+        if (className?.includes('__codinitThought__')) {
+          return <ThoughtBox title="Thought process">{children}</ThoughtBox>;
+        }
 
-            if (elementDataAttr) {
-              try {
-                elementData = JSON.parse(elementDataAttr);
-              } catch (e) {
-                console.error('Failed to parse element data:', e);
-              }
-            }
+        return (
+          <div className={className} {...props}>
+            {children}
+          </div>
+        );
+      },
+      pre: (props) => {
+        const { children, node, ...rest } = props;
 
-            if (!messageId) {
-              logger.error(`Invalid message id ${messageId}`);
-            }
+        const [firstChild] = node?.children ?? [];
 
-            return (
-              <div className="bg-codinit-elements-background-depth-3 border border-codinit-elements-borderColor rounded-lg p-3 my-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-mono bg-codinit-elements-background-depth-2 px-2 py-1 rounded text-codinit-elements-textTer">
-                    {elementData?.tagName}
-                  </span>
-                  {elementData?.className && (
-                    <span className="text-xs text-codinit-elements-textSecondary">.{elementData.className}</span>
-                  )}
-                </div>
-                <code className="block text-sm !text-codinit-elements-textSecondary !bg-codinit-elements-background-depth-2 border border-codinit-elements-borderColor p-2 rounded">
-                  {elementData?.displayText}
-                </code>
-              </div>
-            );
-          }
+        if (
+          firstChild &&
+          firstChild.type === 'element' &&
+          firstChild.tagName === 'code' &&
+          firstChild.children[0].type === 'text'
+        ) {
+          const { className, ...rest } = firstChild.properties;
+          const [, language = 'plaintext'] = /language-(\w+)/.exec(String(className) || '') ?? [];
 
-          if (className?.includes('__boltThought__')) {
-            return <ThoughtBox title="Thought process">{children}</ThoughtBox>;
-          }
+          return <CodeBlock code={firstChild.children[0].value} language={language as BundledLanguage} {...rest} />;
+        }
 
-          if (className?.includes('__codinitQuickAction__') || dataProps?.dataCodinitQuickAction) {
-            return <div className="flex items-center gap-2 flex-wrap mt-3.5">{children}</div>;
-          }
+        return <pre {...rest}>{children}</pre>;
+      },
+    } satisfies Components;
+  }, []);
 
-          return (
-            <div className={className} {...props}>
-              {children}
-            </div>
-          );
-        },
-        pre: (props) => {
-          const { children, node, ...rest } = props;
-
-          const [firstChild] = node?.children ?? [];
-
-          if (
-            firstChild &&
-            firstChild.type === 'element' &&
-            firstChild.tagName === 'code' &&
-            firstChild.children[0].type === 'text'
-          ) {
-            const { className, ...rest } = firstChild.properties;
-            const [, language = 'plaintext'] = /language-(\w+)/.exec(String(className) || '') ?? [];
-
-            return <CodeBlock code={firstChild.children[0].value} language={language as BundledLanguage} {...rest} />;
-          }
-
-          return <pre {...rest}>{children}</pre>;
-        },
-        button: ({ node, children, ...props }) => {
-          const dataProps = node?.properties as Record<string, unknown>;
-
-          if (
-            dataProps?.class?.toString().includes('__codinitQuickAction__') ||
-            dataProps?.dataCodinitQuickAction === 'true'
-          ) {
-            const type = dataProps['data-type'] || dataProps.dataType;
-            const message = dataProps['data-message'] || dataProps.dataMessage;
-            const path = dataProps['data-path'] || dataProps.dataPath;
-            const href = dataProps['data-href'] || dataProps.dataHref;
-
-            const iconClassMap: Record<string, string> = {
-              file: 'i-ph:file',
-              message: 'i-ph:chats',
-              implement: 'i-ph:code',
-              link: 'i-ph:link',
-            };
-
-            const safeType = typeof type === 'string' ? type : '';
-            const iconClass = iconClassMap[safeType] ?? 'i-ph:question';
-
-            return (
-              <button
-                className="rounded-md justify-center px-3 py-1.5 text-xs bg-codinit-elements-item-backgroundAccent text-codinit-elements-item-contentAccent opacity-90 hover:opacity-100 flex items-center gap-2 cursor-pointer"
-                data-type={type}
-                data-message={message}
-                data-path={path}
-                data-href={href}
-                onClick={() => {
-                  if (type === 'file') {
-                    openArtifactInWorkbench(path);
-                  } else if (type === 'message' && append) {
-                    append({
-                      id: `quick-action-message-${Date.now()}`,
-                      content: [
-                        {
-                          type: 'text',
-                          text: `[Model: ${model}]\n\n[Provider: ${provider?.name}]\n\n${message}`,
-                        },
-                      ] as any,
-                      role: 'user',
-                    });
-                    console.log('Message appended:', message);
-                  } else if (type === 'implement' && append && setChatMode) {
-                    setChatMode('build');
-                    append({
-                      id: `quick-action-implement-${Date.now()}`,
-                      content: [
-                        {
-                          type: 'text',
-                          text: `[Model: ${model}]\n\n[Provider: ${provider?.name}]\n\n${message}`,
-                        },
-                      ] as any,
-                      role: 'user',
-                    });
-                  } else if (type === 'link' && typeof href === 'string') {
-                    try {
-                      const url = new URL(href, window.location.origin);
-                      window.open(url.toString(), '_blank', 'noopener,noreferrer');
-                    } catch (error) {
-                      console.error('Invalid URL:', href, error);
-                    }
-                  }
-                }}
-              >
-                <div className={`text-lg ${iconClass}`} />
-                {children}
-              </button>
-            );
-          }
-
-          return <button {...props}>{children}</button>;
-        },
-      } satisfies Components;
-    }, []);
-
-    return (
-      <ReactMarkdown
-        allowedElements={allowedHTMLElements}
-        className={styles.MarkdownContent}
-        components={components}
-        remarkPlugins={remarkPlugins(limitedMarkdown)}
-        rehypePlugins={rehypePlugins(html)}
-      >
-        {stripCodeFenceFromArtifact(children)}
-      </ReactMarkdown>
-    );
-  },
-);
+  return (
+    <ReactMarkdown
+      allowedElements={allowedHTMLElements}
+      className={styles.MarkdownContent}
+      components={components}
+      remarkPlugins={remarkPlugins(limitedMarkdown)}
+      rehypePlugins={rehypePlugins(html)}
+    >
+      {stripCodeFenceFromArtifact(children)}
+    </ReactMarkdown>
+  );
+});
 
 /**
  * Removes code fence markers (```) surrounding an artifact element while preserving the artifact content.

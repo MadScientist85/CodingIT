@@ -17,6 +17,7 @@ import styles from './BaseChat.module.scss';
 import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
 import GitCloneButton from './GitCloneButton';
 import type { ProviderInfo } from '~/types/model';
+import StarterTemplates from './StarterTemplates';
 import type { ActionAlert, SupabaseAlert, DeployAlert, LlmErrorAlertType } from '~/types/actions';
 import DeployChatAlert from '~/components/deploy/DeployAlert';
 import ChatAlert from './ChatAlert';
@@ -28,7 +29,6 @@ import { expoUrlAtom } from '~/lib/stores/qrCodeStore';
 import { useStore } from '@nanostores/react';
 import { StickToBottom, useStickToBottomContext } from '~/lib/hooks';
 import { ChatBox } from './ChatBox';
-import type { DesignScheme } from '~/types/design-scheme';
 import type { ElementInfo } from '~/components/workbench/Inspector';
 import LlmErrorAlert from './LLMApiAlert';
 
@@ -74,8 +74,6 @@ interface BaseChatProps {
   chatMode?: 'discuss' | 'build';
   setChatMode?: (mode: 'discuss' | 'build') => void;
   append?: (message: Message) => void;
-  designScheme?: DesignScheme;
-  setDesignScheme?: (scheme: DesignScheme) => void;
   selectedElement?: ElementInfo | null;
   setSelectedElement?: (element: ElementInfo | null) => void;
   addToolResult?: ({ toolCallId, result }: { toolCallId: string; result: any }) => void;
@@ -121,8 +119,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       chatMode,
       setChatMode,
       append,
-      designScheme,
-      setDesignScheme,
       selectedElement,
       setSelectedElement,
       addToolResult = () => {
@@ -340,19 +336,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const baseChat = (
       <div
         ref={ref}
-        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-x-hidden')}
+        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div className="flex flex-col lg:flex-row overflow-y-auto overflow-x-hidden w-full h-full">
+        <div className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
               <div id="intro" className="mt-[16vh] max-w-2xl mx-auto text-center px-4 lg:px-0">
                 <h1 className="text-3xl lg:text-6xl font-bold text-codinit-elements-textPrimary mb-4 animate-fade-in">
-                  Prompt Build & Ship In Seconds
+                  Prompt Build & Deploy
                 </h1>
                 <p className="text-md lg:text-xl mb-8 text-codinit-elements-textSecondary animate-fade-in animation-delay-200">
-                  Bring ideas to life in seconds or get help on existing projects.
+                  Let your imagination build your next startup idea.
                 </p>
               </div>
             )}
@@ -459,28 +455,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   handleFileUpload={handleFileUpload}
                   chatMode={chatMode}
                   setChatMode={setChatMode}
-                  designScheme={designScheme}
-                  setDesignScheme={setDesignScheme}
                   selectedElement={selectedElement}
                   setSelectedElement={setSelectedElement}
                 />
               </div>
             </StickToBottom>
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center gap-8">
               {!chatStarted && (
-                <div className="flex flex-col items-center gap-4 mt-8">
-                  <h3 className="text-codinit-elements-textSecondary text-sm font-medium">
-                    Start by importing existing work
-                  </h3>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {ImportButtons(importChat)}
-                    <GitCloneButton importChat={importChat} />
-                  </div>
+                <div className="flex justify-center gap-2">
+                  {ImportButtons(importChat)}
+                  <GitCloneButton importChat={importChat} />
                 </div>
               )}
-              <div className="flex flex-col gap-5">
-                {/* Example prompts and starter templates removed for cleaner UI */}
-              </div>
+              <div className="flex flex-col">{!chatStarted && <StarterTemplates />}</div>
             </div>
           </div>
           <ClientOnly>

@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { classNames } from '~/utils/classNames';
 import { toast } from 'react-toastify';
 import { providerBaseUrlEnvKeys } from '~/utils/constants';
-import { SiAmazon, SiGoogle, SiGithub, SiHuggingface, SiPerplexity, SiOpenai } from 'react-icons/si';
+import { SiAmazon, SiGoogle, SiHuggingface, SiPerplexity, SiOpenai } from 'react-icons/si';
 import { BsRobot, BsCloud } from 'react-icons/bs';
 import { TbBrain, TbCloudComputing } from 'react-icons/tb';
 import { BiCodeBlock, BiChip } from 'react-icons/bi';
@@ -21,7 +21,6 @@ type ProviderName =
   | 'Anthropic'
   | 'Cohere'
   | 'Deepseek'
-  | 'Github'
   | 'Google'
   | 'Groq'
   | 'HuggingFace'
@@ -39,7 +38,6 @@ const PROVIDER_ICONS: Record<ProviderName, IconType> = {
   Anthropic: FaBrain,
   Cohere: BiChip,
   Deepseek: BiCodeBlock,
-  Github: SiGithub,
   Google: SiGoogle,
   Groq: BsCloud,
   HuggingFace: SiHuggingface,
@@ -55,7 +53,6 @@ const PROVIDER_ICONS: Record<ProviderName, IconType> = {
 // Update PROVIDER_DESCRIPTIONS to use the same type
 const PROVIDER_DESCRIPTIONS: Partial<Record<ProviderName, string>> = {
   Anthropic: 'Access Claude and other Anthropic models',
-  Github: 'Use OpenAI models hosted through GitHub infrastructure',
   OpenAI: 'Use GPT-4, GPT-3.5, and other OpenAI models',
 };
 
@@ -91,7 +88,10 @@ const CloudProvidersTab = () => {
     (enabled: boolean) => {
       // Update all providers
       filteredProviders.forEach((provider) => {
-        settings.updateProviderSettings(provider.name, { ...provider.settings, enabled });
+        settings.updateProviderSettings(provider.name, {
+          ...provider.settings,
+          enabled,
+        });
       });
 
       setCategoryEnabled(enabled);
@@ -103,13 +103,20 @@ const CloudProvidersTab = () => {
   const handleToggleProvider = useCallback(
     (provider: IProviderConfig, enabled: boolean) => {
       // Update the provider settings in the store
-      settings.updateProviderSettings(provider.name, { ...provider.settings, enabled });
+      settings.updateProviderSettings(provider.name, {
+        ...provider.settings,
+        enabled,
+      });
 
       if (enabled) {
-        logStore.logProvider(`Provider ${provider.name} enabled`, { provider: provider.name });
+        logStore.logProvider(`Provider ${provider.name} enabled`, {
+          provider: provider.name,
+        });
         toast.success(`${provider.name} enabled`);
       } else {
-        logStore.logProvider(`Provider ${provider.name} disabled`, { provider: provider.name });
+        logStore.logProvider(`Provider ${provider.name} disabled`, {
+          provider: provider.name,
+        });
         toast.success(`${provider.name} disabled`);
       }
     },
@@ -121,7 +128,10 @@ const CloudProvidersTab = () => {
       const newBaseUrl: string | undefined = baseUrl.trim() || undefined;
 
       // Update the provider settings in the store
-      settings.updateProviderSettings(provider.name, { ...provider.settings, baseUrl: newBaseUrl });
+      settings.updateProviderSettings(provider.name, {
+        ...provider.settings,
+        baseUrl: newBaseUrl,
+      });
 
       logStore.logProvider(`Base URL updated for ${provider.name}`, {
         provider: provider.name,
